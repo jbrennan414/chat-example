@@ -15,6 +15,7 @@
   </head>
   <body>
     <ul id="messages"></ul>
+    <h3 style="position:absolute; bottom:40px">Someone is typing...</h3>
     <form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
@@ -32,6 +33,9 @@
         socket.on('chat message', function(msg){
           $('#messages').append($('<li>').text(msg));
         });
+        socket.on('connect', function(msg){
+          console.log("sure, does this shit work?")
+        })
       });
     </script>
   </body>
