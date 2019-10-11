@@ -11,6 +11,7 @@
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
+      span.hidden { display: none; }
     </style>
   </head>
   <body>
@@ -24,20 +25,48 @@
     <script>
       $(function () {
         var socket = io();
+        var typing = false;
+        var timeout = undefined;
+        var noLongerTypingMessage = ` done typing.`
+        var typingMessage = ` typing...`
         $('form').submit(function(e){
           e.preventDefault(); // prevents page reloading
           socket.emit('chat message', $('#m').val());
           $('#m').val('');
           return false;
         });
-        socket.on('chat message', function(msg){
-          $('#messages').append($('<li>').text(msg));
+        socket.on('chat message', function(msg, id){
+          $(`span`).addClass('hidden')
+          $('#messages').append(`<li class="${id}">${id}: ${msg} <span class="${id} hidden">typing...<span></li>`)
         });
         socket.on('broadcast', function(id){
-          $('#messages').append($('<li>').text(`~~~~ User ${id} joined ~~~~`));
+          $('#messages').append($(`<li id=${id}>`).text(`~~~~ User ${id} joined ~~~~`));
         })
-        socket.on('connect', function(msg){
-          console.log("sure, does this shit work?")
+
+        socket.on('is typing', function(id){
+          $(`span.${id}`).last().removeClass('hidden')
+        })
+
+        socket.on('done typing', function(id){
+          $(`span.${id}`).last().addClass('hidden')
+        })
+
+        function timeoutFunction(){
+          typing = false
+          socket.emit('no longer typing',noLongerTypingMessage)
+        }
+
+        $('#m').keypress(function(event){
+          var keycode = (event.keyCode ? event.keyCode : evnet.which)
+          //preventing enter from triggering this
+          if(typing == false && keycode != 13){
+            typing = true
+            socket.emit('typing message',typingMessage)
+            timeout = setTimeout(timeoutFunction, 600)
+          } else if(keycode != 13) {
+            clearTimeout(timeout)
+            timeout = setTimeout(timeoutFunction, 600)
+          }
         })
       });
     </script>
