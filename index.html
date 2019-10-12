@@ -16,7 +16,7 @@
   </head>
   <body>
     <ul id="messages"></ul>
-    <!-- <h3 style="position:absolute; bottom:40px">Someone is typing...</h3> -->
+    <h3 id="typingIndicator" style="position:absolute; bottom:40px; display:none">Someone is typing...</h3>
     <form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
@@ -44,11 +44,11 @@
         })
 
         socket.on('is typing', function(id){
-          $(`span.${id}`).last().removeClass('hidden')
+          $('#typingIndicator').css({'display':''});
         })
 
         socket.on('done typing', function(id){
-          $(`span.${id}`).last().addClass('hidden')
+          $('#typingIndicator').css({'display':'none'});
         })
 
         function timeoutFunction(){
